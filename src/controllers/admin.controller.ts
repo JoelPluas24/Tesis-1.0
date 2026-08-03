@@ -21,6 +21,25 @@ export const listarFisioterapeutas = async (req: Request, res: Response, next: N
   }
 };
 
+export const listarFisioterapeutasInactivos = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await AdminService.listarFisioterapeutasInactivos();
+    return ApiResponse.success(res, 'Lista de fisioterapeutas inactivos obtenida', data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const reactivarFisioterapeuta = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    await AdminService.reactivarFisioterapeuta(Number(id));
+    return ApiResponse.success(res, 'Fisioterapeuta reactivado exitosamente');
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const actualizarFisioterapeuta = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;

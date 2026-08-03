@@ -3,7 +3,7 @@ import { asignarPaciente } from '../controllers/admin.controller.js';
 import { authenticateToken } from '../middlewares/authenticateToken.js';
 import { authorizeRole } from '../middlewares/authorizeRole.js';
 import { UserRole } from '../types/roles.js';
-import { listarFisioterapeutas, actualizarFisioterapeuta, eliminarFisioterapeuta } from '../controllers/admin.controller.js';
+import { listarFisioterapeutas, actualizarFisioterapeuta, eliminarFisioterapeuta, listarFisioterapeutasInactivos, reactivarFisioterapeuta } from '../controllers/admin.controller.js';
 import { listarPacientes, actualizarPaciente, eliminarPaciente, listarPacientesInactivos, reactivarPaciente } from '../controllers/admin.controller.js';
 import { reporteGeneral } from '../controllers/admin.controller.js';
 
@@ -64,6 +64,20 @@ router.delete(
   authenticateToken,
   authorizeRole([UserRole.ADMIN]),
   eliminarFisioterapeuta
+);
+
+router.get(
+  '/fisioterapeutas-inactivos',
+  authenticateToken,
+  authorizeRole([UserRole.ADMIN]),
+  listarFisioterapeutasInactivos
+);
+
+router.put(
+  '/fisioterapeutas/:id/reactivar',
+  authenticateToken,
+  authorizeRole([UserRole.ADMIN]),
+  reactivarFisioterapeuta
 );
 
 router.put(

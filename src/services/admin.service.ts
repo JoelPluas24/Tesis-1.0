@@ -56,6 +56,32 @@ export class AdminService {
     return await AdminRepository.getFisioterapeutasList();
   }
 
+  static async listarFisioterapeutasInactivos() {
+    return await AdminRepository.getFisioterapeutasInactivosList();
+  }
+
+  static async reactivarFisioterapeuta(id: number) {
+    const connection = await pool.getConnection();
+
+    try {
+      await connection.beginTransaction();
+
+      const usuarioId = await AdminRepository.getFisioterapeutaUserId(id, connection);
+      if (!usuarioId) {
+        throw new AppError('Fisioterapeuta no encontrado', 404);
+      }
+
+      await AdminRepository.reactivarUsuario(usuarioId, connection);
+
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
   static async actualizarFisioterapeuta(id: number, data: any) {
     const { nombres, apellidos, email, especialidad, telefono } = data;
     const connection = await pool.getConnection();

@@ -47,9 +47,10 @@ export class RutinaRepository {
 
   static async getRutinaActiva(pacienteId: number) {
     const [rutina]: any = await pool.query(
-      `SELECT r.*, p.nombre as patologia_nombre 
+      `SELECT r.*, p.nombre as patologia_nombre, CONCAT(u.nombres, ' ', u.apellidos) as fisioterapeuta_nombre 
        FROM rutinas r
        LEFT JOIN patologias p ON r.patologia_id = p.id
+       LEFT JOIN usuarios u ON r.fisioterapeuta_id = u.id
        WHERE r.paciente_id = ? AND r.activa = 1`,
       [pacienteId]
     );
@@ -106,6 +107,7 @@ export class RutinaRepository {
       `SELECT r.id, r.fecha_inicio, r.fecha_fin, r.fecha_finalizacion, r.observaciones, r.activa, r.fecha_creacion,
               r.fase_recuperacion, r.nivel_dolor, r.comorbilidades, r.nivel_actividad_fisica,
               p.nombre as patologia_nombre, p.descripcion as patologia_descripcion, p.nivel_gravedad as patologia_gravedad,
+              CONCAT(u.nombres, ' ', u.apellidos) as fisioterapeuta_nombre,
               (SELECT COUNT(*) FROM rutina_ejercicios re WHERE re.rutina_id = r.id) as total_ejercicios,
               (SELECT COUNT(*) FROM cumplimiento_ejercicios c 
                INNER JOIN rutina_ejercicios re ON c.ejercicio_id = re.ejercicio_id AND c.rutina_id = re.rutina_id
@@ -113,6 +115,7 @@ export class RutinaRepository {
                AND c.fecha >= r.fecha_inicio AND c.fecha <= IFNULL(r.fecha_fin, CURDATE())) as total_completados
        FROM rutinas r
        LEFT JOIN patologias p ON r.patologia_id = p.id
+       LEFT JOIN usuarios u ON r.fisioterapeuta_id = u.id
        WHERE r.paciente_id = ? AND r.activa = 0
        ORDER BY r.fecha_creacion DESC`,
       [pacienteId]

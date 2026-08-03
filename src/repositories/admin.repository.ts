@@ -37,6 +37,16 @@ export class AdminRepository {
     return rows;
   }
 
+  static async getFisioterapeutasInactivosList() {
+    const [rows] = await pool.query(`
+      SELECT f.id, u.id as usuario_id, u.nombres, u.apellidos, u.email, u.activo, f.especialidad, f.telefono
+      FROM fisioterapeutas f
+      INNER JOIN usuarios u ON f.usuario_id = u.id
+      WHERE u.activo = 0
+    `);
+    return rows;
+  }
+
   static async getFisioterapeutaUserId(id: number, connection: any) {
     const [rows]: any = await connection.query(`SELECT usuario_id FROM fisioterapeutas WHERE id = ?`, [id]);
     return rows[0]?.usuario_id;
