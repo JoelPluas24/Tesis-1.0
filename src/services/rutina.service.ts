@@ -7,7 +7,7 @@ import { socketService } from './socket.service.js';
 
 export class RutinaService {
   static async crearRutina(data: any, fisioterapeutaId: number) {
-    const { paciente_id, fecha_inicio, fecha_fin, observaciones, ejercicios } = data;
+    const { paciente_id, fecha_inicio, fecha_fin, observaciones, ejercicios, total_sesiones } = data;
     const connection = await pool.getConnection();
 
     try {
@@ -16,7 +16,7 @@ export class RutinaService {
       await RutinaRepository.deactivateRutinasPrevias(paciente_id, connection);
 
       const rutinaId = await RutinaRepository.createRutina(
-        { paciente_id, fisioterapeuta_id: fisioterapeutaId, fecha_inicio, fecha_fin, observaciones },
+        { paciente_id, fisioterapeuta_id: fisioterapeutaId, fecha_inicio, fecha_fin, observaciones, total_sesiones },
         connection
       );
 

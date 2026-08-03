@@ -33,12 +33,7 @@ export class CumplimientoService {
     if (rutina) {
       const totalEjercicios = await CumplimientoRepository.countEjerciciosRutina(rutinaId);
       
-      const fi = new Date(fecha_inicio);
-      const ff = new Date(fecha_fin);
-      const diffTime = Math.abs(ff.getTime() - fi.getTime());
-      const totalDias = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-      
-      const totalTareasEsperadas = totalEjercicios * totalDias;
+      const totalTareasEsperadas = totalEjercicios * (rutina.total_sesiones || 10);
       
       // Contar cuántos cumplimientos totales ha hecho en ese rango de fechas
       const realizados = await CumplimientoRepository.countTotalCumplimientosRutina(pacienteId, rutinaId, fecha_inicio, fecha_fin);
@@ -113,12 +108,7 @@ export class CumplimientoService {
     
     const totalEjercicios = await CumplimientoRepository.countEjerciciosRutina(rutinaId);
     
-    const fi = new Date(fecha_inicio);
-    const ff = new Date(fecha_fin);
-    const diffTime = Math.abs(ff.getTime() - fi.getTime());
-    const totalDias = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-    
-    const totalTareasEsperadas = totalEjercicios * totalDias;
+    const totalTareasEsperadas = totalEjercicios * (rutina.total_sesiones || 10);
     const realizados = await CumplimientoRepository.countTotalCumplimientosRutina(pacienteId, rutinaId, fecha_inicio, fecha_fin);
 
     const porcentajeCumplimiento = totalTareasEsperadas > 0
@@ -133,7 +123,7 @@ export class CumplimientoService {
       porcentaje_cumplimiento: porcentajeCumplimiento,
       fecha_inicio,
       fecha_fin,
-      total_dias: totalDias
+      total_dias: (rutina.total_sesiones || 10) // Mantenemos el nombre total_dias para compatibilidad del frontend
     };
   }
 

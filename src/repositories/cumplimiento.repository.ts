@@ -29,7 +29,7 @@ export class CumplimientoRepository {
 
   static async getRutinaActivaConFechas(pacienteId: number) {
     const [rows]: any = await pool.query(
-      `SELECT id, fecha_inicio, fecha_fin FROM rutinas WHERE paciente_id = ? AND activa = 1`,
+      `SELECT id, fecha_inicio, fecha_fin, total_sesiones FROM rutinas WHERE paciente_id = ? AND activa = 1`,
       [pacienteId]
     );
     return rows[0] || null;

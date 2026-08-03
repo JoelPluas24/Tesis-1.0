@@ -9,7 +9,7 @@ export class RutinaRepository {
   }
 
   static async createRutina(data: any, connection: any) {
-    const { paciente_id, fisioterapeuta_id, fecha_inicio, fecha_fin, observaciones } = data;
+    const { paciente_id, fisioterapeuta_id, fecha_inicio, fecha_fin, observaciones, total_sesiones } = data;
     
     // Buscar la patología activa del paciente
     const [patologias]: any = await connection.query(
@@ -26,10 +26,12 @@ export class RutinaRepository {
     const pInfo = pacientesInfo[0] || {};
     const { fase_recuperacion, nivel_dolor, comorbilidades, nivel_actividad_fisica } = pInfo;
 
+    const sesiones = total_sesiones || 10;
+
     const [result]: any = await connection.query(
-      `INSERT INTO rutinas (paciente_id, fisioterapeuta_id, fecha_inicio, fecha_fin, observaciones, patologia_id, fase_recuperacion, nivel_dolor, comorbilidades, nivel_actividad_fisica)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [paciente_id, fisioterapeuta_id, fecha_inicio, fecha_fin, observaciones, patologia_id, fase_recuperacion, nivel_dolor, comorbilidades ? JSON.stringify(comorbilidades) : null, nivel_actividad_fisica]
+      `INSERT INTO rutinas (paciente_id, fisioterapeuta_id, fecha_inicio, fecha_fin, observaciones, patologia_id, fase_recuperacion, nivel_dolor, comorbilidades, nivel_actividad_fisica, total_sesiones)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [paciente_id, fisioterapeuta_id, fecha_inicio, fecha_fin, observaciones, patologia_id, fase_recuperacion, nivel_dolor, comorbilidades ? JSON.stringify(comorbilidades) : null, nivel_actividad_fisica, sesiones]
     );
     return result.insertId;
   }
@@ -104,7 +106,7 @@ export class RutinaRepository {
 
   static async getHistorialRutinas(pacienteId: number) {
     const [rutinas]: any = await pool.query(
-      `SELECT r.id, r.fecha_inicio, r.fecha_fin, r.fecha_finalizacion, r.observaciones, r.activa, r.fecha_creacion,
+      `SELECT r.id, r.fecha_inicio, r.fecha_fin, r.fecha_finalizacion, r.observaciones, r.activa, r.fecha_creacion, r.total_sesiones,
               r.fase_recuperacion, r.nivel_dolor, r.comorbilidades, r.nivel_actividad_fisica,
               p.nombre as patologia_nombre, p.descripcion as patologia_descripcion, p.nivel_gravedad as patologia_gravedad,
               CONCAT(u.nombres, ' ', u.apellidos) as fisioterapeuta_nombre,
@@ -123,10 +125,7 @@ export class RutinaRepository {
 
     for (const r of rutinas) {
       if (r.fecha_inicio && r.fecha_fin) {
-         const msPerDay = 1000 * 60 * 60 * 24;
-         const diffTime = Math.abs(new Date(r.fecha_fin).getTime() - new Date(r.fecha_inicio).getTime());
-         const diffDays = Math.ceil(diffTime / msPerDay) + 1;
-         const expected = diffDays * (r.total_ejercicios || 0);
+         const expected = (r.total_sesiones || 10) * (r.total_ejercicios || 0);
          r.porcentaje = expected > 0 ? Math.round((r.total_completados / expected) * 100) : 0;
          if(r.porcentaje > 100) r.porcentaje = 100;
       } else {
